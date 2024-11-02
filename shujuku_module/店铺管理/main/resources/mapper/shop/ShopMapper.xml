@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.shop.mapper.ShopMapper">
+    
+    <resultMap type="Shop" id="ShopResult">
+        <result property="shopId"    column="shop_id"    />
+        <result property="shopName"    column="shop_name"    />
+        <result property="shopAddress"    column="shop_address"    />
+        <result property="shopPhone"    column="shop_phone"    />
+        <result property="shopStatus"    column="shop_status"    />
+    </resultMap>
+
+    <resultMap id="ShopDishResult" type="Shop" extends="ShopResult">
+        <collection property="dishList" ofType="Dish" column="shop_id" select="selectDishList" />
+    </resultMap>
+
+    <resultMap type="Dish" id="DishResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="price"    column="price"    />
+        <result property="image"    column="image"    />
+        <result property="description"    column="description"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectShopVo">
+        select shop_id, shop_name, shop_address, shop_phone, shop_status from tb_shop
+    </sql>
+
+    <select id="selectShopList" parameterType="Shop" resultMap="ShopResult">
+        <include refid="selectShopVo"/>
+        <where>  
+            <if test="shopName != null  and shopName != ''"> and shop_name like concat('%', #{shopName}, '%')</if>
+            <if test="shopAddress != null  and shopAddress != ''"> and shop_address = #{shopAddress}</if>
+            <if test="shopPhone != null  and shopPhone != ''"> and shop_phone = #{shopPhone}</if>
+            <if test="shopStatus != null "> and shop_status = #{shopStatus}</if>
+        </where>
+    </select>
+    
+    <select id="selectShopByShopId" parameterType="Long" resultMap="ShopDishResult">
+        select shop_id, shop_name, shop_address, shop_phone, shop_status
+        from tb_shop
+        where shop_id = #{shopId}
+    </select>
+
+    <select id="selectDishList" resultMap="DishResult">
+        select id, name, price, image, description, status, create_time, update_time
+        from tb_dish
+        where name = #{name}
+    </select>
+
+    <insert id="insertShop" parameterType="Shop" useGeneratedKeys="true" keyProperty="shopId">
+        insert into tb_shop
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="shopName != null and shopName != ''">shop_name,</if>
+            <if test="shopAddress != null and shopAddress != ''">shop_address,</if>
+            <if test="shopPhone != null">shop_phone,</if>
+            <if test="shopStatus != null">shop_status,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="shopName != null and shopName != ''">#{shopName},</if>
+            <if test="shopAddress != null and shopAddress != ''">#{shopAddress},</if>
+            <if test="shopPhone != null">#{shopPhone},</if>
+            <if test="shopStatus != null">#{shopStatus},</if>
+         </trim>
+    </insert>
+
+    <update id="updateShop" parameterType="Shop">
+        update tb_shop
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="shopName != null and shopName != ''">shop_name = #{shopName},</if>
+            <if test="shopAddress != null and shopAddress != ''">shop_address = #{shopAddress},</if>
+            <if test="shopPhone != null">shop_phone = #{shopPhone},</if>
+            <if test="shopStatus != null">shop_status = #{shopStatus},</if>
+        </trim>
+        where shop_id = #{shopId}
+    </update>
+
+    <delete id="deleteShopByShopId" parameterType="Long">
+        delete from tb_shop where shop_id = #{shopId}
+    </delete>
+
+    <delete id="deleteShopByShopIds" parameterType="String">
+        delete from tb_shop where shop_id in 
+        <foreach item="shopId" collection="array" open="(" separator="," close=")">
+            #{shopId}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteDishByNames" parameterType="String">
+        delete from tb_dish where name in 
+        <foreach item="name" collection="array" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </delete>
+
+    <delete id="deleteDishByName" parameterType="Long">
+        delete from tb_dish where name = #{name}
+    </delete>
+
+    <insert id="batchDish">
+        insert into tb_dish( id, name, price, image, description, status, create_time, update_time) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.name}, #{item.price}, #{item.image}, #{item.description}, #{item.status}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
+</mapper>

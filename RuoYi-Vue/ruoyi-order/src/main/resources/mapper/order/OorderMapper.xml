@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.order.mapper.OorderMapper">
+    
+    <resultMap type="Oorder" id="OorderResult">
+        <result property="orderId"    column="order_id"    />
+        <result property="shopName"    column="shop_name"    />
+        <result property="orderMoney"    column="order_money"    />
+        <result property="orderWay"    column="order_way"    />
+        <result property="consPhone"    column="cons_phone"    />
+        <result property="consName"    column="cons_name"    />
+        <result property="consAddre"    column="cons_addre"    />
+        <result property="checked"    column="checked"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectOorderVo">
+        select order_id, shop_name, order_money, order_way, cons_phone, cons_name, cons_addre, checked, create_time from oorder
+    </sql>
+
+    <select id="selectOorderList" parameterType="Oorder" resultMap="OorderResult">
+        <include refid="selectOorderVo"/>
+        <where>  
+            <if test="shopName != null  and shopName != ''"> and shop_name like concat('%', #{shopName}, '%')</if>
+            <if test="orderMoney != null "> and order_money = #{orderMoney}</if>
+            <if test="orderWay != null "> and order_way = #{orderWay}</if>
+            <if test="consPhone != null  and consPhone != ''"> and cons_phone = #{consPhone}</if>
+            <if test="consName != null  and consName != ''"> and cons_name like concat('%', #{consName}, '%')</if>
+            <if test="consAddre != null  and consAddre != ''"> and cons_addre = #{consAddre}</if>
+            <if test="checked != null "> and checked = #{checked}</if>
+        </where>
+    </select>
+    
+    <select id="selectOorderByOrderId" parameterType="Long" resultMap="OorderResult">
+        <include refid="selectOorderVo"/>
+        where order_id = #{orderId}
+    </select>
+
+    <insert id="insertOorder" parameterType="Oorder" useGeneratedKeys="true" keyProperty="orderId">
+        insert into oorder
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="shopName != null and shopName != ''">shop_name,</if>
+            <if test="orderMoney != null">order_money,</if>
+            <if test="orderWay != null">order_way,</if>
+            <if test="consPhone != null and consPhone != ''">cons_phone,</if>
+            <if test="consName != null and consName != ''">cons_name,</if>
+            <if test="consAddre != null and consAddre != ''">cons_addre,</if>
+            <if test="checked != null">checked,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="shopName != null and shopName != ''">#{shopName},</if>
+            <if test="orderMoney != null">#{orderMoney},</if>
+            <if test="orderWay != null">#{orderWay},</if>
+            <if test="consPhone != null and consPhone != ''">#{consPhone},</if>
+            <if test="consName != null and consName != ''">#{consName},</if>
+            <if test="consAddre != null and consAddre != ''">#{consAddre},</if>
+            <if test="checked != null">#{checked},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateOorder" parameterType="Oorder">
+        update oorder
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="shopName != null and shopName != ''">shop_name = #{shopName},</if>
+            <if test="orderMoney != null">order_money = #{orderMoney},</if>
+            <if test="orderWay != null">order_way = #{orderWay},</if>
+            <if test="consPhone != null and consPhone != ''">cons_phone = #{consPhone},</if>
+            <if test="consName != null and consName != ''">cons_name = #{consName},</if>
+            <if test="consAddre != null and consAddre != ''">cons_addre = #{consAddre},</if>
+            <if test="checked != null">checked = #{checked},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where order_id = #{orderId}
+    </update>
+
+    <delete id="deleteOorderByOrderId" parameterType="Long">
+        delete from oorder where order_id = #{orderId}
+    </delete>
+
+    <delete id="deleteOorderByOrderIds" parameterType="String">
+        delete from oorder where order_id in 
+        <foreach item="orderId" collection="array" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </delete>
+</mapper>
